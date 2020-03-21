@@ -1,5 +1,11 @@
 package MySQL::Util::CLI;
 
+=head1 NAME
+
+MySQL::Util::CLI
+
+=cut
+
 use Modern::Perl;
 use Moose;
 use namespace::autoclean;

@@ -1,5 +1,11 @@
 package MySQL::Util::CLI::Exec;
 
+=head1 NAME
+
+MySQL::Util::CLI::Exec
+
+=cut
+
 use Modern::Perl;
 use Moose;
 use Kavorka '-all';

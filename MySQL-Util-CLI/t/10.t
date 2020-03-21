@@ -21,5 +21,7 @@ use MySQL::Util::CLI;
 my $cli = MySQL::Util::CLI->new;
 ok($cli);
 
+done_testing();
+
 ###### END MAIN ######
 
