@@ -61,7 +61,7 @@ create-user:
         C: createPass
         c: createUser
       optional:
-        H: createHosts
+        H: forHosts
       flags:    
            
 drop-user:
@@ -120,11 +120,41 @@ grant-privileges:
         U: grantUser
       optional:
         R: privileges
-        D: grantDbName
-        H: grantHosts
-        T: grantTables
+        D: forDbName
+        H: forHosts
+        T: forTables
       flags:    
 
+revoke-privileges:
+  class:
+    name: MySQL::Util::CLI::Exec
+    attr:
+      required:
+      optional:
+        u: user
+        p: pass      
+        h: host
+        P: port
+      flags:
+        dry-run: dryRun
+  method:
+    name: revokePrivileges
+    args:
+      required:
+        U: revokeUser
+      optional:
+        R: privileges
+        D: forDbName
+        H: forHosts
+        T: forTables
+      flags: 
+      
+show-dbs:
+  class:
+    name: MySQL::Util::CLI::Exec
+  method:
+    name: showDatabases
+    
 show-grants:   
   class:
     name: MySQL::Util::CLI::Exec
@@ -141,7 +171,7 @@ show-grants:
       required:
       optional:
         U: forUser
-        H: fotHost
+        H: forHost
     
 show-users:   
   class:

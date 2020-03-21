@@ -161,25 +161,35 @@ method createDatabase (Str :$dbName!,
 	my @sql = 'create database';
 	push @sql, "if not exists" if $ifNotExists;
 	push @sql, $dbName;
-	
-	$self->doSql( sql => join(' ', @sql));
+
+	$self->doSql( sql => join( ' ', @sql ) );
 }
 
 method getGrants (Str :$forUser,
 			      Str :$forHost) {
 
-	my @sql = 'show grants';	
+	my @sql = 'show grants';
 	if ($forUser) {
 		push @sql, "for";
 		push @sql, "'$forUser'";
-		push @sql, sprintf( "%s'%s'", '@', $forHost) if $forHost;
-	}	
+		push @sql, sprintf( "%s'%s'", '@', $forHost ) if $forHost;
+	}
 
 	my $dbh = $self->getDbh;
-	my $sql = join(' ', @sql);
+	my $sql = join( ' ', @sql );
 	$self->Logger->verbose($sql);
 	my $aref = $dbh->selectall_arrayref($sql);
-	
+
+	return @$aref;
+}
+
+method getDatabases () {
+
+	my $dbh = $self->getDbh;
+	my $sql = "show databases";
+	$self->Logger->verbose($sql);
+	my $aref = $dbh->selectall_arrayref($sql);
+
 	return @$aref;
 }
 
@@ -219,7 +229,28 @@ method grantPrivileges (Str 		 :$userName!,
 		push @sql, 'on';
 		push @sql, sprintf( '%s.%s', $dbName, $tables );
 		push @sql, 'to';
-		push @sql, sprintf( '%s@%s', $userName, $host );
+		push @sql, sprintf( q{'%s'@'%s'}, $userName, $host );
+
+		$self->doSql( sql => join( ' ', @sql ) );
+	}
+
+	$self->flushPrivileges;
+}
+
+method revokePrivileges (Str 		 :$userName!,
+					   ArrayRef[Str] :$hosts = [DEFAULT_HOST],
+					   ArrayRef[Str] :$privileges!,
+					   Str           :$dbName = '*',
+					   Str 			 :$tables = '*') {
+
+	foreach my $host (@$hosts) {
+
+		my @sql = ('revoke');
+		push @sql, join( ', ', @$privileges );
+		push @sql, 'on';
+		push @sql, sprintf( '%s.%s', $dbName, $tables );
+		push @sql, 'from';
+		push @sql, sprintf( q{'%s'@'%s'}, $userName, $host );
 
 		$self->doSql( sql => join( ' ', @sql ) );
 	}
@@ -268,7 +299,7 @@ method doSql (Str 	   :$sql!,
 
 	$sql = $self->String->trim($sql);
 
-	$self->Logger->verbose( sprintf 'bind vars: (%s)', join( ', ', @$bind ) );
+	$self->Logger->debug( sprintf 'bind vars: (%s)', join( ', ', @$bind ) );
 	$self->Logger->verbose($sql);
 
 	if ( !$self->dryRun ) {
